@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Diseño y nuevos medios, segunda versión remota">
+    <link href="style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <title>DNO037vR2 &#128211;</title>
+</head>
+
+<body>
+    <header>
+        <h1>Resumen</h1>
+        <nav id="menu">
+            <ul>
+                <li><a href="index.html">Vue.js</a></li>
+                <li><a href="page-1.html">Chart.js + jQuery</a></li>
+                <li><a href="page-2.html">Leaflet + Papa Parse</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="page">
+        <h2>Titanic</h2>
+        <div id="mapa" style="width: 100%; height: 50vh;"></div>
+    </main>
+    <footer>
+        <p>Elisa Honorato — Diseño y Nuevos Medios</p>
+    </footer>
+    <form id="opciones">
+        <input type="radio" name="personas" value="todos" checked>
+        <label for="vivo">Vivos</label>
+        <input type="radio" name="personas" value="Vivos">
+        <label for="vivo">Muertos</label>
+        </form>
+    <script>
+        document.getElementsByTagName("a")[2].style.textDecorationLine = "underline";
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js" integrity="sha512-rKFvwjvE4liWPlFnvH4ZhRDfNZ9FOpdkD/BU5gAIA3VS3vOQrQ5BjKgbO3kxebKhHdHcNUHLqxQYSoxee9UwgA==" crossorigin="anonymous"></script>
+
+    <script>
+        Papa.parse("https://gist.githubusercontent.com/michhar/2dfd2de0d4f8727f873422c5d959fff5/raw/fa71405126017e6a37bea592440b4bee94bf7b9e/titanic.csv", {
+            download: true,
+            header: true,
+            dynamicTyping: true,
+            complete: function(respuesta) {
+                console.log(respuesta);
+                var datos = respuesta.data;
+                var Southampton = [];
+                var Svivo = [];
+                var Smuerto = [];
+                var Cherburgo = [];
+                var Cvivo = [];
+                var Cmuerto = [];
+                var Queenstown = [];
+                var Qvivo = [];
+                var Qmuerto = [];
+                datos.forEach(function(pasajero, i) {
+                    if(pasajero.Embarked == "S") {
+                        Southampton.push(pasajero);
+                    } else if(pasajero.Embarked == "C") {
+                        Cherburgo.push(pasajero);
+                    } else {
+                        Queenstown.push(pasajero);
+                    }
+                });
+
+                Southampton.forEach(function(vivo) {
+                    if(vivo.Survived == 1) {
+                        Svivo.push(vivo);    
+                    } else  if(vivo.Survived == 0){
+                        Smuerto.push(vivo);
+                    }      
+                });
+
+                Cherburgo.forEach(function(vivo) {
+                    if(vivo.Survived == 1) {
+                        Cvivo.push(vivo);    
+                    } else  if(vivo.Survived == 0){
+                        Cmuerto.push(vivo);
+                    }      
+                });
+                Queenstown.forEach(function(vivo) {
+                    if(vivo.Survived == 1) {
+                        Qvivo.push(vivo);    
+                    } else  if(vivo.Survived == 0){
+                        Qmuerto.push(vivo);
+                    }      
+                });
+
+
+
+                console.log(Southampton.length);
+                console.log(Cherburgo.length);
+                console.log(Queenstown.length);
+                console.log(Svivo.length);
+                console.log(Cvivo.length);
+                console.log(Qvivo.length);
+                console.log(Smuerto.length);
+                console.log(Cmuerto.length);
+                console.log(Qmuerto.length);
+
+
+                var titanic = L.icon({
+                    iconUrl: "images/titanicpin.png",
+                    iconSize: [59, 36],
+                    iconAnchor: [22, 94],
+                    popupAnchor: [-3, -76]
+                });
+
+
+                var miMapa = L.map("mapa").setView([50.371389, -30.142222], 4.3);
+                L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
+                    maxZoom: 48,
+                    id: "mapbox/light-v10",
+                    tileSize: 512,
+                    zoomOffset: -1,
+
+                }).addTo(miMapa);
+
+
+                var estilo = {
+                    Color: "rgb(20, 210, 220)",
+                    fillOpacity: 1
+
+                };
+                var estilo2 = {
+                    fillColor: "rgb(20, 210, 220)",
+                    fillOpacity: 1
+                };
+                var estilo3 = {
+                    fillColor: "rgb(20, 210, 22)",
+                    fillOpacity: 1
+                };
+              
+
+
+
+                L.circle([50.8965, -1.3968], Southampton.length * 100, estilo).addTo(miMapa).bindPopup("En Southampton embarcaron " + Southampton.length + " personas");
+                L.circle([49.659072, -1.611729], Cherburgo.length * 100, estilo).addTo(miMapa).bindPopup("En Cherburgo embarcaron " + Cherburgo.length + " personas");
+                L.circle([51.851, -8.2967], Queenstown.length * 100, estilo).addTo(miMapa).bindPopup("En Queenstown embarcaron " + Queenstown.length + " personas");
+
+
+                L.circle([50.8965, -1.3968], Svivo.length * 100, estilo2).addTo(miMapa).bindPopup("En Southampton sobrevivieron " + Svivo.length + " personas");
+                L.circle([49.659072, -1.611729], Cvivo.length * 100, estilo2).addTo(miMapa).bindPopup("En Cherburgo sobrevivieron " + Cvivo.length + " personas");
+                L.circle([51.851, -8.2967], Qvivo.length * 100, estilo2).addTo(miMapa).bindPopup("En Queenstown sobrevivieron " + Qvivo.length + " personas");
+
+                L.circle([50.8965, -1.3968], Smuerto.length * 100, estilo3).addTo(miMapa).bindPopup("En Southampton murieron " + Smuerto.length + " personas");
+                L.circle([49.659072, -1.611729], Cmuerto.length * 100, estilo3).addTo(miMapa).bindPopup("En Cherburgo murieron " + Cmuerto.length + " personas");
+                L.circle([51.851, -8.2967], Qmuerto.length * 100, estilo3).addTo(miMapa).bindPopup("En Queenstown murieron " + Qmuerto.length + " personas");
+
+
+                L.marker([41.7325, -49.946944], {
+                    icon: titanic
+                }).addTo(miMapa).bindPopup("Acá se hundió el Titanic el 15/04/1912, cuatro días después de embarcar desde Southampton");
+            },
+        });
+
+    </script>
+</body>
+
+</html>
